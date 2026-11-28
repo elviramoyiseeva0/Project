@@ -1,0 +1,50 @@
+{% extends "boards/base.html" %}
+
+{% block title %}Создать доску — NeiroSlopTerest{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="auth-header">
+            <span class="brand-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </span>
+            <h1 class="auth-title">Новая доска</h1>
+            <p class="auth-subtitle">
+                {% if user.is_authenticated %}
+                    Зарегистрированные пользователи могут создавать доски без ограничений.
+                {% else %}
+                    Гость может создать максимум {{ guest_limit }} доски (использовано {{ boards_count }} из {{ guest_limit }}).
+                {% endif %}
+            </p>
+        </div>
+
+        {% if limit_reached %}
+            <div class="alert alert-error" style="margin-bottom: 18px;">
+                Достигнут лимит досок для гостя ({{ guest_limit }}). Войдите или зарегистрируйтесь, чтобы создавать больше досок.
+            </div>
+        {% endif %}
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {{ field.errors }}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-block" {% if limit_reached %}disabled{% endif %}>
+                Создать доску
+            </button>
+            <a href="{% url 'boards:board_list' %}" class="btn btn-secondary btn-block">Назад к доскам</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

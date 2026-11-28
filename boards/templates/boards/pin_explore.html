@@ -1,0 +1,76 @@
+{% extends "boards/base.html" %}
+
+{% block title %}Home — NeiroSlopTerest{% endblock %}
+
+{% block content %}
+<div class="category-bar">
+    <a href="{% url 'boards:pin_explore' %}" class="cat-pill {% if not query %}active{% endif %}">All</a>
+    <a href="?q=Memes" class="cat-pill {% if query == 'Memes' %}active{% endif %}">Memes</a>
+    <a href="?q=Gaming" class="cat-pill {% if query == 'Gaming' %}active{% endif %}">Gaming</a>
+    <a href="?q=Tech" class="cat-pill {% if query == 'Tech' %}active{% endif %}">Tech</a>
+    <a href="?q=Anime" class="cat-pill {% if query == 'Anime' %}active{% endif %}">Anime</a>
+    <a href="?q=Fitness" class="cat-pill {% if query == 'Fitness' %}active{% endif %}">Fitness</a>
+    <a href="?q=Cars" class="cat-pill {% if query == 'Cars' %}active{% endif %}">Cars</a>
+    <a href="?q=Aesthetic" class="cat-pill {% if query == 'Aesthetic' %}active{% endif %}">Aesthetic</a>
+    <a href="?q=Animals" class="cat-pill {% if query == 'Animals' %}active{% endif %}">Animals</a>
+</div>
+
+{% if query %}
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Поиск: «{{ query }}»</h1>
+            <p class="page-subtitle">Найдено пинов: {{ pins.count }}</p>
+        </div>
+        <a href="{% url 'boards:pin_explore' %}" class="btn btn-secondary btn-sm">Сбросить фильтр</a>
+    </div>
+{% endif %}
+
+{% if pins %}
+    <div class="pins-masonry">
+        {% for pin in pins %}
+            <article class="pin-card">
+                <div class="pin-image-wrap">
+                    <img src="{{ pin.image_url }}" alt="{{ pin.title }}" class="pin-image">
+                    <div class="pin-overlay">
+                        <a href="{% url 'boards:save_pin_to_board' pin.pk %}" class="btn btn-primary btn-sm">
+                            Сохранить
+                        </a>
+                    </div>
+                </div>
+
+                <div class="pin-card-footer">
+                    <h3 class="pin-title">{{ pin.title }}</h3>
+                    <a href="{% url 'boards:save_pin_to_board' pin.pk %}" class="pin-bookmark-btn" title="Сохранить на доску">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>
+                        </svg>
+                    </a>
+                </div>
+
+                {% if pin.description %}
+                    <p class="pin-desc">{{ pin.description|truncatechars:70 }}</p>
+                {% endif %}
+
+                {% if user_boards %}
+                    <form method="post" action="{% url 'boards:save_pin_to_board' pin.pk %}" class="pin-actions-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'boards:pin_explore' %}">
+                        <select name="board" class="form-input" style="padding: 6px 10px; font-size: 0.8rem; flex: 1;">
+                            {% for board in user_boards %}
+                                <option value="{{ board.pk }}">{{ board.title }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">В доску</button>
+                    </form>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <h3>Пинов пока нет</h3>
+        <p>Добавьте пины на главной странице ленты, чтобы сохранять их на доски.</p>
+        <a href="{% url 'index' %}" class="btn btn-primary">Перейти в ленту</a>
+    </div>
+{% endif %}
+{% endblock %}

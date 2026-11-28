@@ -1,0 +1,22 @@
+{% extends "boards/base.html" %}
+
+{% block title %}Удалить «{{ board.title }}» — NeiroSlopTerest{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-card">
+        <div class="auth-header">
+            <h1 class="auth-title">Удалить доску?</h1>
+            <p class="auth-subtitle">
+                Вы уверены, что хотите удалить доску <strong>«{{ board.title }}»</strong>? Это действие нельзя отменить.
+            </p>
+        </div>
+
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-block">Да, удалить доску</button>
+            <a href="{% url 'boards:board_detail' board.pk %}" class="btn btn-secondary btn-block">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

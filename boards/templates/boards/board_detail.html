@@ -1,0 +1,87 @@
+{% extends "boards/base.html" %}
+
+{% block title %}{{ board.title }} — NeiroSlopTerest{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ board.title }}</h1>
+        {% if board.description %}
+        <p class="page-subtitle">{{ board.description }}</p>
+        {% endif %}
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span class="quota-pill">{{ pins.count }} пинов</span>
+        <a href="{% url 'boards:pin_explore' %}" class="btn btn-secondary btn-sm">Найти пины</a>
+        {% if can_manage %}
+        <a href="{% url 'boards:board_delete' board.pk %}" class="btn btn-danger btn-sm">Удалить доску</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if pins %}
+<div class="pins-masonry">
+    {% for pin in pins %}
+    <article class="pin-card">
+        <div class="pin-image-wrap">
+            <img src="{{ pin.image_url }}" alt="{{ pin.title }}" class="pin-image">
+            {% if can_manage %}
+            <div class="pin-overlay">
+                <form method="post" action="{% url 'boards:remove_pin_from_board' board.pk pin.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Убрать</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        <div class="pin-card-footer">
+            <h3 class="pin-title">{{ pin.title }}</h3>
+        </div>
+        {% if pin.description %}
+            <p class="pin-desc">{{ pin.description|truncatechars:70 }}</p>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <h3>На этой доске пока нет пинов</h3>
+    <p>Добавьте понравившиеся пины из ленты ниже или со страницы всех пинов.</p>
+    <a href="{% url 'boards:pin_explore' %}" class="btn btn-primary">Выбрать пины</a>
+</div>
+{% endif %}
+
+{% if can_manage and available_pins %}
+<hr class="section-divider">
+<div class="page-header">
+    <div>
+        <h2 class="page-title" style="font-size: 1.4rem;">Добавить пины на доску</h2>
+        <p class="page-subtitle">Сохраняйте чужие пины в один клик</p>
+    </div>
+</div>
+
+<div class="pins-masonry">
+    {% for pin in available_pins %}
+    <article class="pin-card">
+        <div class="pin-image-wrap">
+            <img src="{{ pin.image_url }}" alt="{{ pin.title }}" class="pin-image">
+            <div class="pin-overlay">
+                <form method="post" action="{% url 'boards:save_pin_to_board' pin.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="board" value="{{ board.pk }}">
+                    <input type="hidden" name="next" value="{% url 'boards:board_detail' board.pk %}">
+                    <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+                </form>
+            </div>
+        </div>
+        <div class="pin-card-footer">
+            <h3 class="pin-title">{{ pin.title }}</h3>
+        </div>
+        {% if pin.description %}
+            <p class="pin-desc">{{ pin.description|truncatechars:70 }}</p>
+        {% endif %}
+    </article>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

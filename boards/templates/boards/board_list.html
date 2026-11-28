@@ -1,0 +1,74 @@
+{% extends "boards/base.html" %}
+
+{% block title %}Мои доски — NeiroSlopTerest{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Ваши доски</h1>
+        <p class="page-subtitle">Собирайте понравившиеся пины в тематические коллекции</p>
+    </div>
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+        {% if user.is_authenticated %}
+            <span class="quota-pill">Создано досок: {{ boards_count }} (без лимита)</span>
+        {% else %}
+            <span class="quota-pill {% if limit_reached %}limit-reached{% endif %}">
+                Гостевой лимит: {{ boards_count }} / {{ guest_limit }} досок
+            </span>
+        {% endif %}
+        <a href="{% url 'boards:board_create' %}" class="btn btn-primary">+ Новая доска</a>
+    </div>
+</div>
+
+{% if boards %}
+    <div class="boards-grid">
+        {% for board in boards %}
+            <article class="board-card">
+                <a href="{% url 'boards:board_detail' board.pk %}" class="board-collage">
+                    {% with board_pins=board.pins.all %}
+                        <div class="board-collage-main">
+                            {% if board_pins.0 %}
+                                <img src="{{ board_pins.0.image_url }}" alt="{{ board_pins.0.title }}">
+                            {% else %}
+                                <div class="board-collage-empty">Нет пинов</div>
+                            {% endif %}
+                        </div>
+                        <div class="board-collage-sub">
+                            {% if board_pins.1 %}
+                                <img src="{{ board_pins.1.image_url }}" alt="{{ board_pins.1.title }}">
+                            {% endif %}
+                        </div>
+                        <div class="board-collage-sub">
+                            {% if board_pins.2 %}
+                                <img src="{{ board_pins.2.image_url }}" alt="{{ board_pins.2.title }}">
+                            {% endif %}
+                        </div>
+                    {% endwith %}
+                </a>
+
+                <div class="board-card-body">
+                    <a href="{% url 'boards:board_detail' board.pk %}">
+                        <h2 class="board-card-title">{{ board.title }}</h2>
+                    </a>
+                    {% if board.description %}
+                        <p class="board-card-desc">{{ board.description|truncatechars:85 }}</p>
+                    {% endif %}
+                    <div class="board-card-footer">
+                        <span class="board-pin-count">{{ board.pins.count }} пинов</span>
+                        <div style="display: flex; gap: 6px;">
+                            <a href="{% url 'boards:board_detail' board.pk %}" class="btn btn-secondary btn-sm">Открыть</a>
+                            <a href="{% url 'boards:board_delete' board.pk %}" class="btn btn-danger btn-sm">Удалить</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <h3>У вас пока нет досок</h3>
+        <p>Создайте первую доску и сохраняйте туда понравившиеся пины.</p>
+        <a href="{% url 'boards:board_create' %}" class="btn btn-primary">Создать первую доску</a>
+    </div>
+{% endif %}
+{% endblock %}
